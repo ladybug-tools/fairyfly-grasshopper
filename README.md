@@ -18,9 +18,8 @@ discovered by Rhino (see dependencies).
 
 The fairyfly-grasshopper plugin has the following dependencies (other than Rhino/Grasshopper):
 
-* [ladybug-core](https://github.com/ladybug-tools/ladybug)
 * [ladybug-geometry](https://github.com/ladybug-tools/ladybug-geometry)
-* [ladybug-comfort](https://github.com/ladybug-tools/ladybug-comfort)
+* [ladybug-core](https://github.com/ladybug-tools/ladybug)
 * [ladybug-rhino](https://github.com/ladybug-tools/ladybug-rhino)
 * [fairyfly-core](https://github.com/ladybug-tools/fairyfly-core)
 * [fairyfly-therm](https://github.com/ladybug-tools/fairyfly-therm)

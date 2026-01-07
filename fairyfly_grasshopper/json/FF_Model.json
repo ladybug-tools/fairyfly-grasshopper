@@ -1,0 +1,43 @@
+{
+  "version": "1.9.0", 
+  "nickname": "Model", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "model", 
+        "description": "A Fairyfly Model object possessing all of the input geometry\nobjects.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "shapes_", 
+      "description": "A list of honeybee Rooms to be added to the Model. Note that at\nleast one Room is necessary to make a simulate-able energy model.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "boundaries_", 
+      "description": "A list of fairyfly Boundary objects to be added to the Model.\nNote that at least two distinct boundary conditions are necessary\nto make a simulate-able THERM model.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_name_", 
+      "description": "Text to be used for the Model name. If no name is provided, it\nwill be \"unnamed\".", 
+      "type": "string", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core fairyfly dependencies\n    from fairyfly.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\n    from ladybug_{{cad}}.config import units_system, tolerance, angle_tolerance\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef check_all_geo_none():\n    \"\"\"Check whether all of the geometry inputs to this component are None.\"\"\"\n    return all(obj_list == [] or obj_list == [None] for obj_list in\n               (shapes_, boundaries_))\n\n\nif all_required_inputs(ghenv.Component) and not check_all_geo_none():\n    # set a default name and get the {{Cad}} Model units\n    units = units_system()\n\n    # create the model\n    model = Model(\n        shapes_, boundaries_,\n        units=units, tolerance=tolerance, angle_tolerance=angle_tolerance)\n    model.display_name = _name_ if _name_ is not None else 'unnamed'\n", 
+  "category": "Fairyfly", 
+  "name": "FF Model", 
+  "description": "Create a Fairyfly Model, which can be used for simulation.\n-"
+}

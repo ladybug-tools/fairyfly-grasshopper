@@ -1,0 +1,36 @@
+{
+  "version": "1.9.0", 
+  "nickname": "DecnstrMat", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "values", 
+        "description": "List of values for the attributes that define the material.", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "attr_names", 
+        "description": "List of text that is the same length as the values, which\nnotes the attribute name for each value.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_mat", 
+      "description": "A material to be deconstructed. This can also be text for a\nmaterial to be looked up in the material library.", 
+      "type": "System.Object", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: THERM", 
+  "code": "\nimport re\n\ntry:  # import the fairyfly-therm dependencies\n    from fairyfly_therm.lib.materials import solid_material_by_name, cavity_material_by_name\n    from fairyfly_therm.material import SolidMaterial\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:  # import the fairyfly dependencies\n    from fairyfly.search import get_attr_nested\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nSOLID_ATTR = (\n    'display_name',\n    'conductivity',\n    'emissivity',\n    'density',\n    'porosity',\n    'specific_heat',\n    'vapor_diffusion_resistance'\n)\n\nCAVITY_ATTR = (\n    'display_name',\n    'cavity_model',\n    'gas.pure_gases',\n    'gas.gas_fractions'\n)\n\n\nif all_required_inputs(ghenv.Component):\n    # check the input\n    if isinstance(_mat, str):\n        try:\n            _mat = solid_material_by_name(_mat)\n        except ValueError:\n            _mat = cavity_material_by_name(_mat)\n\n    # get the values and attribute names\n    rel_attr = SOLID_ATTR if isinstance(_mat, SolidMaterial) else CAVITY_ATTR\n    values, attr_names = [], []\n    for r_attr in rel_attr:\n        values.append(get_attr_nested(_mat, r_attr))\n        attr_names.append(r_attr.split('.')[-1].replace('_', ' ').title())\n\n", 
+  "category": "Fairyfly", 
+  "name": "FF Deconstruct Material", 
+  "description": "Deconstruct a material into its constituient attributes and values.\n-"
+}

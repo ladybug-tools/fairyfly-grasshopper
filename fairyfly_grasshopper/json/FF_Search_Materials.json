@@ -1,0 +1,43 @@
+{
+  "version": "1.9.0", 
+  "nickname": "SearchMats", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "solid_mats", 
+        "description": "A list of solid materials within the fairyfly therm standards\nlibrary (filtered by keywords_ if they are input).", 
+        "type": null, 
+        "default": null
+      }, 
+      {
+        "access": "None", 
+        "name": "cavity_mats", 
+        "description": "A list of gas cavity materials within the fairyfly therm standards\nlibrary (filtered by keywords_ if they are input).", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "keywords_", 
+      "description": "Optional keywords to be used to narrow down the output list of\nmaterials. If nothing is input here, all available materials\nwill be output.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "join_words_", 
+      "description": "If False or None, this component will automatically split\nany strings of multiple keywords (spearated by spaces) into separate\nkeywords for searching. This results in a greater liklihood of\nfinding an item in the search but it may not be appropropriate for\nall cases. You may want to set it to True when you are searching for\na specific phrase that includes spaces. Default: False.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: THERM", 
+  "code": "\ntry:  # import the fairyfly-core dependencies\n    from fairyfly.search import filter_array_by_keywords\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the fairyfly-therm dependencies\n    from fairyfly_therm.lib.materials import SOLID_MATERIALS\n    from fairyfly_therm.lib.materials import CAVITY_MATERIALS\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import turn_off_old_tag\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\nturn_off_old_tag(ghenv.Component)\n\n\nif len(keywords_) == 0:\n    solid_mats = sorted(SOLID_MATERIALS)\n    cavity_mats = sorted(CAVITY_MATERIALS)\nelse:\n    split_words = True if join_words_ is None else not join_words_\n    solid_mats = sorted(filter_array_by_keywords(SOLID_MATERIALS, keywords_, split_words))\n    cavity_mats = sorted(filter_array_by_keywords(CAVITY_MATERIALS, keywords_, split_words))\n", 
+  "category": "Fairyfly", 
+  "name": "FF Search Materials", 
+  "description": "Search for available Materials within the fairyfly therm standards library.\n-"
+}

@@ -1,0 +1,78 @@
+{
+  "version": "1.9.0", 
+  "nickname": "SolidMat", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "mat", 
+        "description": "A standard solid material that can be assigned to a Fairyfly Shape\nto change the properties of the material in a THERM simulation.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_name_", 
+      "description": "Text to set the name for the material.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_conductivity", 
+      "description": "Number for the thermal conductivity of the material [W/m-K].", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_emissivity_", 
+      "description": "Number between 0 and 1 for the infrared hemispherical\nemissivity of the material. (Default: 0.9).", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "density_", 
+      "description": "Number for the density of the material [kg/m3].", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "porosity_", 
+      "description": "Optional number between 0 and 1 for the porosity of the material.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "spec_heat_", 
+      "description": "Number for the specific heat of the material [J/kg-K].", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "vapor_resist_", 
+      "description": "Optional number for the water vapor diffusion resistance factor.", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "rgb_color_", 
+      "description": "An optional color to set the color of the material when it is\nimported to THERM. If unspecified, a randomly-generated color is assigned.", 
+      "type": "System.Drawing.Color", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: THERM", 
+  "code": "\nimport uuid\n\ntry:  # import the core ladybug dependencies\n    from ladybug.color import Color\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:  # import the fairyfly-therm dependencies\n    from fairyfly_therm.material.solid import SolidMaterial\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:  # import ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # set the default material properties\n    _emissivity_ = 0.9 if _emissivity_ is None else _emissivity_\n\n    # create the material\n    mat = SolidMaterial(\n        _conductivity, _emissivity_,\n        density_, porosity_, spec_heat_, vapor_resist_\n    )\n    mat.display_name = _name_ if _name_ is not None else \\\n        'Solid Material {}'.format(str(uuid.uuid4())[:8])\n    if rgb_color_ is not None:\n        mat.color = Color(rgb_color_.R, rgb_color_.G, rgb_color_.B)\n", 
+  "category": "Fairyfly", 
+  "name": "FF Solid Material", 
+  "description": "Create a custom solid material, which can be plugged into the \"FF Shape\" component\nto change the properties of the material in a THERM simulation.\n-"
+}

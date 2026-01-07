@@ -1,0 +1,50 @@
+{
+  "version": "1.9.0", 
+  "nickname": "CavityMat", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "mat", 
+        "description": "A cavity material that can be assigned to a Fairyfly Shape to change the\nproperties of the material in a THERM simulation.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_name_", 
+      "description": "Text to set the name for the material.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_cavity_model_", 
+      "description": "Text for the type of cavity model to be used to determine\nthe thermal resistance of the material. (Default: CEN). Choose from\nthe following.\n* CEN\n* NFRC\n* ISO15099\n* ISO15099Ventilated", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_gas_type_", 
+      "description": "Text describing the types of gas in the gap. (Default: Air).\nText must be one of the following: 'Air', 'Argon', 'Krypton', 'Xenon'.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "rgb_color_", 
+      "description": "An optional color to set the color of the material when it is\nimported to THERM. If unspecified, a randomly-generated color is assigned.", 
+      "type": "System.Drawing.Color", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: THERM", 
+  "code": "\nimport uuid\n\ntry:  # import the core ladybug dependencies\n    from ladybug.color import Color\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:  # import the fairyfly-energy dependencies\n    from fairyfly_therm.material import CavityMaterial, Gas\n    from fairyfly_therm.lib.gases import gas_by_name\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_energy:\\n\\t{}'.format(e))\n\ntry:  # import ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import turn_off_old_tag\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\nturn_off_old_tag(ghenv.Component)\n\n\n# set the default material properties\n_cavity_model_ = 'CEN' if _cavity_model_ is None else _cavity_model_\n_gas_type_ = 'Air' if _gas_type_ is None else _gas_type_\n\n# get the Gas material to fill the cavity\ncavity_gas = gas_by_name(_gas_type_.title())\n\n# create the material\nmat = CavityMaterial(cavity_gas, _cavity_model_)\nmat.display_name = _name_ if _name_ is not None else \\\n    'Cavity Material {}'.format(str(uuid.uuid4())[:8])\nif rgb_color_ is not None:\n    mat.color = Color(rgb_color_.R, rgb_color_.G, rgb_color_.B)\n", 
+  "category": "Fairyfly", 
+  "name": "FF Cavity Material", 
+  "description": "Create a custom cavity material, which can be plugged into the \"FF Shape\" component\nto change the properties of the material in a THERM simulation.\n-"
+}

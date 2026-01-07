@@ -1,0 +1,64 @@
+{
+  "version": "1.9.0", 
+  "nickname": "DumpObjects", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "ff_file", 
+        "description": "The location of the file where the fairyfly JSON is saved.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_ff_objs", 
+      "description": "A list of Fairyfly objects to be written to a file.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_name_", 
+      "description": "A name for the file to which the fairyfly objects will be\nwritten. (Default: 'unnamed').", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_folder_", 
+      "description": "An optional directory into which the fairyfly objects will be\nwritten.  The default is set to the default simulation folder.", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "indent_", 
+      "description": "An optional positive integer to set the indentation used in the\nresulting JSON file.", 
+      "type": "int", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "abridged_", 
+      "description": "Set to \"True\" to serialize the object in its abridged form.\nAbridged objects cannot be reserialized back to fairyfly objects\non their own but they are used throughout fairyfly to minimize\nfile size and unnecessary duplication.", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_dump", 
+      "description": "Set to \"True\" to save the fairyfly objects to file.", 
+      "type": "bool", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\nimport sys\nimport os\nimport json\n\ntry:  # import the core fairyfly dependencies\n    from fairyfly.model import Model\n    from fairyfly.shape import Shape\n    from fairyfly.boundary import Boundary\n    from fairyfly.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\ndef geo_object_warning(obj):\n    \"\"\"Give a warning that individual geometry objects should be added to a Model.\"\"\"\n    msg = 'An individual {} has been connected to the _ff_objs.\\n' \\\n        'The recommended practice is to add this object to a Model and\\n' \\\n        'serialize the Model instead of serializing individual objects.'.format(\n            obj.__class__.__name__)\n    print(msg)\n    give_warning(ghenv.Component, msg)\n\n\nif all_required_inputs(ghenv.Component) and _dump:\n    # set the component defaults\n    name = _name_ if _name_ is not None else 'unnamed'\n    file_name = '{}.json'.format(name) if len(_ff_objs) > 1 or not \\\n        isinstance(_ff_objs[0], Model) else '{}.ffjson'.format(name)\n    folder = _folder_ if _folder_ is not None else folders.default_simulation_folder\n    ff_file = os.path.join(folder, file_name)\n    abridged = bool(abridged_)\n\n    # check to see if any objects are of the geometry type and give a warning\n    geo_types = (Shape, Boundary)\n    for obj in _ff_objs:\n        if isinstance(obj, geo_types):\n            geo_object_warning(obj)\n\n    # create the dictionary to be written to a JSON file\n    if len(_ff_objs) == 1:  # write a single object into a file if the length is 1\n        try:\n            obj_dict = _ff_objs[0].to_dict(abridged=abridged)\n        except TypeError:  # no abridged option\n            obj_dict = _ff_objs[0].to_dict()\n    else:  # create a dictionary of the objects that are indexed by name\n        obj_dict = {}\n        for obj in _ff_objs:\n            try:\n                obj_dict[obj.identifier] = obj.to_dict(abridged=abridged)\n            except TypeError:  # no abridged option\n                obj_dict[obj.identifier] = obj.to_dict()\n\n    # write the dictionary into a file\n    if not os.path.isdir(folder):\n        os.makedirs(folder)\n    if (sys.version_info < (3, 0)):  # we need to manually encode it as UTF-8\n        with open(ff_file, 'wb') as fp:\n            obj_str = json.dumps(obj_dict, indent=indent_, ensure_ascii=False)\n            fp.write(obj_str.encode('utf-8'))\n    else:\n        with open(ff_file, 'w', encoding='utf-8') as fp:\n            obj_str = json.dump(obj_dict, fp, indent=indent_, ensure_ascii=False)\n", 
+  "category": "Fairyfly", 
+  "name": "FF Dump Objects", 
+  "description": "Dump any fairyfly object to a JSON file. You can use \"FF Load Objects\" component\nto load the objects from the file back into Grasshopper.\n-\nFairyfly objects include any fairyfly Model, Material, or Boundary.\n-"
+}

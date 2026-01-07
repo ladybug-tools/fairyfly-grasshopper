@@ -1,0 +1,43 @@
+{
+  "version": "1.9.0", 
+  "nickname": "Shape", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "shapes", 
+        "description": "Fairyfly shapes. These can be used in THERM simulation.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "list", 
+      "name": "_geo", 
+      "description": "Rhino Brep or planar Polyline geometry.", 
+      "type": "Brep", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "_material", 
+      "description": "Optional text for the Shape's THERM material to be looked up in the\nmaterial library (see the \"FF Search Materials\" component for a\nfull list of materials that ship with THERM). This input can\nalso be a custom SolidMaterial or CavityMaterial object created\nfrom the corresponding component. Lastly, it can be text for\nthe name of a HB-Energy material to be looked up in the material\nlibrary (see the \"\"HB Search Materials\" component for a full\nlist of materials that ship with Honeybee).", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "list", 
+      "name": "rgb_color_", 
+      "description": "An optional color to set the color of the material when it is\nimported to THERM. All materials from the Fairyfly Therm Library\nalready possess colors but materials from the HB-Energy material\nlib will have a randomly-generated color if none is assigned here.", 
+      "type": "System.Drawing.Color", 
+      "default": null
+    }
+  ], 
+  "subcategory": "0 :: Create", 
+  "code": "\ntry:  # import the core fairyfly dependencies\n    from fairyfly.shape import Shape\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug dependencies\n    from ladybug.color import Color\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.togeometry import to_face3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, document_counter, \\\n        longest_list, wrap_output\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\ntry:  # import the fairyfly-therm extension\n    from fairyfly_therm.lib.materials import solid_material_by_name, \\\n        cavity_material_by_name\n    from fairyfly_therm.material import SolidMaterial, CavityMaterial\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:  # import the honeybee-energy extension\n    from honeybee_energy.lib.materials import opaque_material_by_identifier\nexcept ImportError as e:\n    opaque_material_by_identifier = None\n\n\nif all_required_inputs(ghenv.Component):\n    shapes = []  # list of shapes that will be returned\n    for j, geo in enumerate(_geo):\n        mat = longest_list(_material, j)\n        if isinstance(mat, str):\n            try:\n                mat = solid_material_by_name(mat)\n            except ValueError:\n                try:\n                    mat = cavity_material_by_name(mat)\n                except ValueError:\n                    try:\n                        if opaque_material_by_identifier is None:\n                            raise ValueError()\n                        mat = opaque_material_by_identifier(mat)\n                        mat = SolidMaterial.from_energy_material(mat)\n                    except ValueError:\n                        msg = '\"{}\" was not found in any of the material ' \\\n                            'libraries.'.format(mat)\n                        raise ValueError(msg)\n        else:\n            assert isinstance(mat, (SolidMaterial, CavityMaterial)), 'Expected ' \\\n                'SolidMaterial or CavityMaterial. Got {}.'.format(type(mat))\n        if len(rgb_color_) != 0:\n            col = longest_list(rgb_color_, j)\n            if not mat._locked:\n                mat.color = Color(col.R, col.G, col.B)\n\n        lb_faces = to_face3d(geo)\n        for lb_face in lb_faces:\n            ff_shape = Shape(lb_face)\n            ff_shape.display_name = '{} {}'.format(\n                mat.display_name, document_counter(mat.display_name))\n            ff_shape.properties.therm.material = mat\n            shapes.append(ff_shape)\n    shapes = wrap_output(shapes)", 
+  "category": "Fairyfly", 
+  "name": "FF Shape", 
+  "description": "Create Fairyfly Shape.\n-"
+}
