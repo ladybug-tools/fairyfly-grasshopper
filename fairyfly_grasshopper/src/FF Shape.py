@@ -34,13 +34,14 @@ Create Fairyfly Shape.
 
 ghenv.Component.Name = 'FF Shape'
 ghenv.Component.NickName = 'Shape'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core fairyfly dependencies
     from fairyfly.shape import Shape
+    from fairyfly.model import Model
 except ImportError as e:
     raise ImportError('\nFailed to import fairyfly:\n\t{}'.format(e))
 
@@ -50,9 +51,10 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
+    from ladybug_rhino.config import units_system, current_tolerance
     from ladybug_rhino.togeometry import to_face3d
     from ladybug_rhino.grasshopper import all_required_inputs, document_counter, \
-        longest_list, wrap_output
+        longest_list, wrap_output, give_warning
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -70,6 +72,12 @@ except ImportError as e:
 
 
 if all_required_inputs(ghenv.Component):
+    # check the model tolerance
+    tol_msg = Model.check_reasonable_tolerance(units_system(), current_tolerance())
+    if tol_msg is not None:
+        give_warning(ghenv.Component, tol_msg)
+
+    #prodess the inputs
     shapes = []  # list of shapes that will be returned
     for j, geo in enumerate(_geo):
         mat = longest_list(_material, j)

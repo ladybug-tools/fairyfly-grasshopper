@@ -34,7 +34,7 @@ simulated or opened in the THERM interface.
 
 ghenv.Component.Name = 'FF Model to THMZ'
 ghenv.Component.NickName = 'ModelToTHMZ'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '1 :: THERM'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -62,12 +62,9 @@ except ImportError as e:
 
 
 if all_required_inputs(ghenv.Component) and _write:
-    # check the presence of openstudio and check that the version is compatible
-    therm_folders.check_therm_version()
+    # process the simulation folder name
     assert isinstance(_model, Model), \
         'Expected Fairyfly Model for _model input. Got {}.'.format(type(_model))
-
-    # process the simulation folder name
     model_name = clean_string(_model.display_name)
     _folder_ = os.path.join(folders.default_simulation_folder, model_name) \
         if _folder_ is None else _folder_
@@ -77,5 +74,6 @@ if all_required_inputs(ghenv.Component) and _write:
         thmz = os.path.join(_folder_, '{}.thmz'.format(model_name))
         model_to_thmz(_model, thmz)
     else:
+        therm_folders.check_therm_version()
         silent = True if run_ > 1 else False
         thmz = run_model(_model, _folder_, silent)

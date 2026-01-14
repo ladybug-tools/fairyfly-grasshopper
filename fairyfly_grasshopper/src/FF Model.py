@@ -28,7 +28,7 @@ Create a Fairyfly Model, which can be used for simulation.
 
 ghenv.Component.Name = 'FF Model'
 ghenv.Component.NickName = 'Model'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -39,8 +39,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import fairyfly:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
-    from ladybug_rhino.grasshopper import all_required_inputs
-    from ladybug_rhino.config import units_system, tolerance, angle_tolerance
+    from ladybug_rhino.grasshopper import all_required_inputs, give_warning
+    from ladybug_rhino.config import units_system, current_tolerance, angle_tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -52,8 +52,11 @@ def check_all_geo_none():
 
 
 if all_required_inputs(ghenv.Component) and not check_all_geo_none():
-    # set a default name and get the Rhino Model units
-    units = units_system()
+    # check the Rhino Model units
+    units, tolerance = units_system(), current_tolerance()
+    tol_msg = Model.check_reasonable_tolerance(units, tolerance)
+    if tol_msg is not None:
+        give_warning(ghenv.Component, tol_msg)
 
     # create the model
     model = Model(

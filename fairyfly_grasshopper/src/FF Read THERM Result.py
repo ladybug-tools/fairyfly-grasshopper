@@ -33,11 +33,15 @@ Create Fairyfly Boundary.
             temperature or heat flow through the construction.
         legend: A legend showing the values that correspond to the colors of the mesh.
         title: A text object for the study title.
+        vis_set: A VisualizationSet object for drawing a detailed version of the
+            Therm results in the Rhino scene. This can be connected to
+            the "LB Preview Visualization Set" component to display this
+            version of the results in Rhino.
 """
 
 ghenv.Component.Name = 'FF Read THERM Result'
 ghenv.Component.NickName = 'ThermResult'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '1 :: THERM'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -53,6 +57,11 @@ try:  # import the core ladybug dependencies
     from ladybug.color import Colorset
     from ladybug.datatype.temperature import Temperature
     from ladybug.datatype.energyflux import EnergyFlux
+except ImportError as e:
+    raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
+
+try:
+    from ladybug_display.visualization import VisualizationSet
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
@@ -129,6 +138,10 @@ if all_required_inputs(ghenv.Component):
             points = [from_point3d(pt) for pt in study_mesh.vertices]
             mesh = from_mesh3d(study_mesh)
             legend = legend_objects(graphic.legend)
+            
+            # create the VisualizationSet
+            vis_set = VisualizationSet.from_single_analysis_geo(
+                'Therm_Results', [study_mesh], results, graphic.legend_parameters)
 
     # hide the points from the scene
     hide_output(ghenv.Component, 1)

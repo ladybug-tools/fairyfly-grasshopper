@@ -53,13 +53,14 @@ Create Fairyfly Boundary.
 
 ghenv.Component.Name = 'FF Boundary'
 ghenv.Component.NickName = 'Boundary'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core fairyfly dependencies
     from fairyfly.boundary import Boundary
+    from fairyfly.model import Model
 except ImportError as e:
     raise ImportError('\nFailed to import fairyfly:\n\t{}'.format(e))
 
@@ -75,14 +76,20 @@ except ImportError as e:
     raise ImportError('\nFailed to import ladybug:\n\t{}'.format(e))
 
 try:  # import the ladybug_rhino dependencies
+    from ladybug_rhino.config import units_system, current_tolerance
     from ladybug_rhino.togeometry import to_polyline3d
     from ladybug_rhino.grasshopper import all_required_inputs, document_counter, \
-        longest_list, wrap_output, de_objectify_output
+        longest_list, wrap_output, de_objectify_output, give_warning
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
 
 if all_required_inputs(ghenv.Component):
+    # check the model tolerance
+    tol_msg = Model.check_reasonable_tolerance(units_system(), current_tolerance())
+    if tol_msg is not None:
+        give_warning(ghenv.Component, tol_msg)
+
     # create the SteadyState condition object
     name = 'Condition {}'.format(document_counter('condition')) \
         if _name_ is None else _name_
