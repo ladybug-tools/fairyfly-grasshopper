@@ -31,7 +31,7 @@ to change the properties of the material in a THERM simulation.
 
 ghenv.Component.Name = 'FF Solid Material'
 ghenv.Component.NickName = 'SolidMat'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '1 :: THERM'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -60,7 +60,7 @@ if all_required_inputs(ghenv.Component):
 
     # create the material
     mat = SolidMaterial(
-        _conductivity, _emissivity_,
+        _conductivity, _emissivity_, None,
         density_, porosity_, spec_heat_, vapor_resist_
     )
     mat.display_name = _name_ if _name_ is not None else \

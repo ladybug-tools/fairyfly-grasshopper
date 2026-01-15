@@ -34,7 +34,7 @@ Create Fairyfly Shape.
 
 ghenv.Component.Name = 'FF Shape'
 ghenv.Component.NickName = 'Shape'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -67,8 +67,12 @@ except ImportError as e:
 
 try:  # import the honeybee-energy extension
     from honeybee_energy.lib.materials import opaque_material_by_identifier
+    from honeybee_energy.material.opaque import EnergyMaterial
+    from honeybee_energy.material.glazing import EnergyWindowMaterialGlazing
 except ImportError as e:
     opaque_material_by_identifier = None
+    EnergyMaterial = None
+    EnergyWindowMaterialGlazing = None
 
 
 if all_required_inputs(ghenv.Component):
@@ -98,6 +102,11 @@ if all_required_inputs(ghenv.Component):
                             'libraries.'.format(mat)
                         raise ValueError(msg)
         else:
+            if EnergyMaterial is not None and isinstance(mat, EnergyMaterial):
+                mat = SolidMaterial.from_energy_material(mat)
+            if EnergyWindowMaterialGlazing is not None and \
+                    isinstance(mat, EnergyWindowMaterialGlazing):
+                mat = SolidMaterial.from_energy_window_material_glazing(mat)
             assert isinstance(mat, (SolidMaterial, CavityMaterial)), 'Expected ' \
                 'SolidMaterial or CavityMaterial. Got {}.'.format(type(mat))
         if len(rgb_color_) != 0:
