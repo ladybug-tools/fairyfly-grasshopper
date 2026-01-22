@@ -30,7 +30,7 @@ It also includes any fairyfly Material or Simulation object.
 
 ghenv.Component.Name = 'FF Load Objects'
 ghenv.Component.NickName = 'LoadObjects'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '4'
@@ -51,7 +51,7 @@ except ImportError as e:
 
 try:  # import the core ladybug_rhino dependencies
     from ladybug_rhino.grasshopper import all_required_inputs, give_warning
-    from ladybug_rhino.config import units_system, tolerance
+    from ladybug_rhino.config import units_system, current_tolerance
 except ImportError as e:
     raise ImportError('\nFailed to import ladybug_rhino:\n\t{}'.format(e))
 
@@ -72,11 +72,11 @@ def model_units_tolerance_check(model):
         model.convert_to_units(units_system())
 
     # check that the model tolerance is not too far from the Rhino tolerance
-    if model.tolerance / tolerance >= 100:
+    if model.tolerance / current_tolerance() >= 100:
         msg = 'Imported Model tolerance "{}" is significantly coarser than the ' \
             'current Rhino model tolerance "{}".\nIt is recommended that the ' \
             'Rhino document tolerance be changed to be coarser and this ' \
-            'component is re-run.'.format(model.tolerance, tolerance)
+            'component is re-run.'.format(model.tolerance, current_tolerance())
         print msg
         give_warning(ghenv.Component, msg)
 
