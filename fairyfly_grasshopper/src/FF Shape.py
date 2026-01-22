@@ -34,7 +34,7 @@ Create Fairyfly Shape.
 
 ghenv.Component.Name = 'FF Shape'
 ghenv.Component.NickName = 'Shape'
-ghenv.Component.Message = '1.9.2'
+ghenv.Component.Message = '1.9.3'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -82,26 +82,32 @@ if all_required_inputs(ghenv.Component):
         give_warning(ghenv.Component, tol_msg)
 
     #prodess the inputs
+    mats = {}  # dictorionary to prevent re-making materials
     shapes = []  # list of shapes that will be returned
     for j, geo in enumerate(_geo):
         mat = longest_list(_material, j)
         if isinstance(mat, str):
-            try:
-                mat = solid_material_by_name(mat)
-            except ValueError:
+            if mat in mats:
+                mat = mats[mat]
+            else:
                 try:
-                    mat = cavity_material_by_name(mat)
+                    mat = solid_material_by_name(mat)
                 except ValueError:
                     try:
-                        if opaque_material_by_identifier is None:
-                            raise ValueError()
-                        mat = opaque_material_by_identifier(mat)
-                        mat = SolidMaterial.from_energy_material(mat)
+                        mat = cavity_material_by_name(mat)
                     except ValueError:
-                        msg = '"{}" was not found in any of the material ' \
-                            'libraries.'.format(mat)
-                        raise ValueError(msg)
+                        try:
+                            if opaque_material_by_identifier is None:
+                                raise ValueError()
+                            mat = opaque_material_by_identifier(mat)
+                            mat = SolidMaterial.from_energy_material(mat)
+                        except ValueError:
+                            msg = '"{}" was not found in any of the material ' \
+                                'libraries.'.format(mat)
+                            raise ValueError(msg)
         else:
+            if mat.display_name in mats:
+                mat = mats[mat.display_name]
             if EnergyMaterial is not None and isinstance(mat, EnergyMaterial):
                 mat = SolidMaterial.from_energy_material(mat)
             if EnergyWindowMaterialGlazing is not None and \
@@ -113,6 +119,7 @@ if all_required_inputs(ghenv.Component):
             col = longest_list(rgb_color_, j)
             if not mat._locked:
                 mat.color = Color(col.R, col.G, col.B)
+        mats[mat.display_name] = mat
 
         lb_faces = to_face3d(geo)
         for lb_face in lb_faces:
