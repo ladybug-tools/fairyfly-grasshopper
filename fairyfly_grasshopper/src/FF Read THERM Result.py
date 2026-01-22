@@ -44,7 +44,7 @@ Create Fairyfly Boundary.
 
 ghenv.Component.Name = 'FF Read THERM Result'
 ghenv.Component.NickName = 'ThermResult'
-ghenv.Component.Message = '1.9.2'
+ghenv.Component.Message = '1.9.3'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '1 :: THERM'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -101,7 +101,7 @@ if all_required_inputs(ghenv.Component):
 
     else:
         # scale the mesh to the current Rhino model units
-        conversion = conversion_to_meters() / 1000
+        conversion = 0.001 / conversion_to_meters()
         study_mesh = study_mesh.scale(conversion)
         shape_geo = result_obj.shape_faces
         shape_geo = [f.scale(conversion) for f in shape_geo]

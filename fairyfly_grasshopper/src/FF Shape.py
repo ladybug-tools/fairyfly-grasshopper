@@ -34,7 +34,7 @@ Create Fairyfly Shape.
 
 ghenv.Component.Name = 'FF Shape'
 ghenv.Component.NickName = 'Shape'
-ghenv.Component.Message = '1.9.3'
+ghenv.Component.Message = '1.9.4'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -66,7 +66,8 @@ except ImportError as e:
     raise ImportError('\nFailed to import fairyfly_therm:\n\t{}'.format(e))
 
 try:  # import the honeybee-energy extension
-    from honeybee_energy.lib.materials import opaque_material_by_identifier
+    from honeybee_energy.lib.materials import opaque_material_by_identifier, \
+        window_material_by_identifier
     from honeybee_energy.material.opaque import EnergyMaterial
     from honeybee_energy.material.glazing import EnergyWindowMaterialGlazing
 except ImportError as e:
@@ -96,15 +97,21 @@ if all_required_inputs(ghenv.Component):
                     try:
                         mat = cavity_material_by_name(mat)
                     except ValueError:
+                        msg = '"{}" was not found in any of the material ' \
+                                'libraries.'.format(mat)
                         try:
                             if opaque_material_by_identifier is None:
-                                raise ValueError()
+                                raise ValueError(msg)
                             mat = opaque_material_by_identifier(mat)
                             mat = SolidMaterial.from_energy_material(mat)
                         except ValueError:
-                            msg = '"{}" was not found in any of the material ' \
-                                'libraries.'.format(mat)
-                            raise ValueError(msg)
+                            try:
+                                if window_material_by_identifier is None:
+                                    raise ValueError(msg)
+                                mat = window_material_by_identifier(mat)
+                                mat = SolidMaterial.from_energy_window_material_glazing(mat)
+                            except ValueError:
+                                raise ValueError(msg)
         else:
             if mat.display_name in mats:
                 mat = mats[mat.display_name]
