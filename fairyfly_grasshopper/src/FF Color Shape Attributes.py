@@ -40,7 +40,7 @@ different shapes.
 
 ghenv.Component.Name = 'FF Color Shape Attributes'
 ghenv.Component.NickName = 'ColorShapeAttr'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -82,6 +82,8 @@ if all_required_inputs(ghenv.Component):
         color_dict = {mat.display_name: mat.color
                       for mat in color_model.properties.therm.materials}
         leg_colors = [color_dict[m_name] for m_name in color_obj.attributes_unique]
+        if len(leg_colors) == 1:
+            leg_colors = [leg_colors[0]] * 2
         color_obj.legend_parameters.colors = leg_colors
 
     # output the visualization geometry
