@@ -24,9 +24,9 @@ different boundaries.
             of the colored boundaries (Default: None).
 
     Returns:
-        lines: Line segments of the boundaries colored according to their attributes.
-        legend: Geometry representing the legend for colored lines.
         wire_frame: A list of lines representing the outlines of the _ff_objs.
+        legend: Geometry representing the legend for colored lines.
+        lines: Line segments of the boundaries colored according to their attributes.
         values: A list of values noting the attribute assigned to each boundary.
         colors: A list of colors noting the color of each boundary in the Rhino scene.
             This can be used in conjunction with the native Grasshopper
@@ -40,7 +40,7 @@ different boundaries.
 
 ghenv.Component.Name = 'FF Color Boundary Attributes'
 ghenv.Component.NickName = 'ColorBoundaryAttr'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
@@ -55,7 +55,7 @@ except ImportError as e:
 
 try:  # import the ladybug_rhino dependencies
     from ladybug_rhino.colorize import ColoredLine
-    from ladybug_rhino.fromgeometry import from_linesegment2d, from_face3d_to_wireframe
+    from ladybug_rhino.fromgeometry import from_linesegment3d, from_face3d_to_wireframe
     from ladybug_rhino.fromobjects import legend_objects
     from ladybug_rhino.color import color_to_color
     from ladybug_rhino.grasshopper import all_required_inputs, schedule_solution
@@ -101,7 +101,7 @@ if all_required_inputs(ghenv.Component):
     colors = [color_to_color(col) for col in graphic.value_colors]
     lines = []
     for lin, col in zip(flat_geo, colors):
-        col_line = ColoredLine(from_linesegment2d(lin))
+        col_line = ColoredLine(from_linesegment3d(lin))
         col_line.color = col
         col_line.thickness = 3
         lines.append(col_line)

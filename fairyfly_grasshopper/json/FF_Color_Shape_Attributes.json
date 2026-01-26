@@ -1,71 +1,71 @@
 {
-  "version": "1.9.1", 
-  "nickname": "ColorShapeAttr", 
   "outputs": [
     [
       {
-        "access": "None", 
-        "name": "mesh", 
-        "description": "Meshes of the shapes colored according to their attributes.", 
-        "type": null, 
-        "default": null
-      }, 
-      {
-        "access": "None", 
-        "name": "legend", 
-        "description": "Geometry representing the legend for colored meshes.", 
-        "type": null, 
-        "default": null
-      }, 
-      {
-        "access": "None", 
+        "default": null, 
         "name": "wire_frame", 
+        "type": null, 
         "description": "A list of lines representing the outlines of the _ff_objs.", 
-        "type": null, 
-        "default": null
+        "access": "None"
       }, 
       {
-        "access": "None", 
+        "default": null, 
+        "name": "legend", 
+        "type": null, 
+        "description": "Geometry representing the legend for colored meshes.", 
+        "access": "None"
+      }, 
+      {
+        "default": null, 
+        "name": "mesh", 
+        "type": null, 
+        "description": "Meshes of the shapes colored according to their attributes.", 
+        "access": "None"
+      }, 
+      {
+        "default": null, 
         "name": "values", 
-        "description": "A list of values noting the attribute assigned to each shape.", 
         "type": null, 
-        "default": null
+        "description": "A list of values noting the attribute assigned to each shape.", 
+        "access": "None"
       }, 
       {
-        "access": "None", 
+        "default": null, 
         "name": "colors", 
-        "description": "A list of colors noting the color of each shape in the Rhino scene.\nThis can be used in conjunction with the native Grasshopper\n\"Custom Preview\" component to create custom visualizations in\nthe Rhino scene.", 
         "type": null, 
-        "default": null
+        "description": "A list of colors noting the color of each shape in the Rhino scene.\nThis can be used in conjunction with the native Grasshopper\n\"Custom Preview\" component to create custom visualizations in\nthe Rhino scene.", 
+        "access": "None"
       }
     ]
   ], 
+  "version": "1.9.2", 
+  "name": "FF Color Shape Attributes", 
+  "nickname": "ColorShapeAttr", 
+  "category": "Fairyfly", 
+  "description": "Color Fairyfly Shapes in the Rhino scene using their attributes.\n_\nThis can be used as a means to check that correct properties are assigned to\ndifferent shapes.\n-", 
+  "code": "\ntry:  # import the core fairyfly dependencies\n    from fairyfly.model import Model\n    from fairyfly.shape import Shape\n    from fairyfly.colorobj import ColorShape\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_face3ds_to_colored_mesh, \\\n        from_face3d_to_wireframe\n    from ladybug_{{cad}}.fromobjects import legend_objects\n    from ladybug_{{cad}}.color import color_to_color\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nDEFAULT_PROP = 'properties.therm.material.display_name'\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any shapes from input Models\n    _attribute_ = DEFAULT_PROP if _attribute_ is None else _attribute_\n    shapes = []\n    for ff_obj in _ff_objs:\n        if isinstance(ff_obj, Model):\n            shapes.extend(ff_obj.shapes)\n        elif isinstance(ff_obj, Shape):\n            shapes.append(ff_obj)\n\n    # create the ColorShape visualization object\n    color_obj = ColorShape(shapes, _attribute_, legend_par_)\n    # assign material colors if this is what is being used for coloring\n    if _attribute_ == DEFAULT_PROP and color_obj.legend_parameters.are_colors_default:\n        color_model = Model(shapes)\n        color_dict = {mat.display_name: mat.color\n                      for mat in color_model.properties.therm.materials}\n        leg_colors = [color_dict[m_name] for m_name in color_obj.attributes_unique]\n        if len(leg_colors) == 1:\n            leg_colors = [leg_colors[0]] * 2\n        color_obj.legend_parameters.colors = leg_colors\n\n    # output the visualization geometry\n    graphic = color_obj.graphic_container\n    values = color_obj.attributes_original\n    flat_geo = color_obj.geometry\n    mesh = []\n    for fc, col in zip(flat_geo, graphic.value_colors):\n        mesh.append(from_face3ds_to_colored_mesh([fc], col))\n    wire_frame = []\n    for face in flat_geo:\n        wire_frame.extend(from_face3d_to_wireframe(face))\n    legend = legend_objects(graphic.legend)\n    colors = [color_to_color(col) for col in graphic.value_colors]\n    vis_set = color_obj\n", 
   "inputs": [
     {
-      "access": "list", 
+      "default": null, 
       "name": "_ff_objs", 
+      "type": "System.Object", 
       "description": "An array of fairyfly Shapes to be colored with their attributes\nin the Rhino scene. This can also be an entire Model to be colored.", 
-      "type": "System.Object", 
-      "default": null
+      "access": "list"
     }, 
     {
-      "access": "item", 
+      "default": null, 
       "name": "_attribute_", 
-      "description": "Text for the name of the attribute with which the shapes should\nbe colored. The \"FF Shape Attributes\" component lists all of the\nattributes of the shape. (Default: THERM Material).", 
       "type": "string", 
-      "default": null
+      "description": "Text for the name of the attribute with which the shapes should\nbe colored. The \"FF Shape Attributes\" component lists all of the\nattributes of the shape. (Default: THERM Material).", 
+      "access": "item"
     }, 
     {
-      "access": "item", 
+      "default": null, 
       "name": "legend_par_", 
-      "description": "An optional LegendParameter object to change the display\nof the colored shapes. (Default: None).", 
       "type": "System.Object", 
-      "default": null
+      "description": "An optional LegendParameter object to change the display\nof the colored shapes. (Default: None).", 
+      "access": "item"
     }
   ], 
-  "subcategory": "0 :: Create", 
-  "code": "\ntry:  # import the core fairyfly dependencies\n    from fairyfly.model import Model\n    from fairyfly.shape import Shape\n    from fairyfly.colorobj import ColorShape\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_face3ds_to_colored_mesh, \\\n        from_face3d_to_wireframe\n    from ladybug_{{cad}}.fromobjects import legend_objects\n    from ladybug_{{cad}}.color import color_to_color\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\nDEFAULT_PROP = 'properties.therm.material.display_name'\n\n\nif all_required_inputs(ghenv.Component):\n    # extract any shapes from input Models\n    _attribute_ = DEFAULT_PROP if _attribute_ is None else _attribute_\n    shapes = []\n    for ff_obj in _ff_objs:\n        if isinstance(ff_obj, Model):\n            shapes.extend(ff_obj.shapes)\n        elif isinstance(ff_obj, Shape):\n            shapes.append(ff_obj)\n\n    # create the ColorShape visualization object\n    color_obj = ColorShape(shapes, _attribute_, legend_par_)\n    # assign material colors if this is what is being used for coloring\n    if _attribute_ == DEFAULT_PROP and color_obj.legend_parameters.are_colors_default:\n        color_model = Model(shapes)\n        color_dict = {mat.display_name: mat.color\n                      for mat in color_model.properties.therm.materials}\n        leg_colors = [color_dict[m_name] for m_name in color_obj.attributes_unique]\n        if len(leg_colors) == 1:\n            leg_colors = [leg_colors[0]] * 2\n        color_obj.legend_parameters.colors = leg_colors\n\n    # output the visualization geometry\n    graphic = color_obj.graphic_container\n    values = color_obj.attributes_original\n    flat_geo = color_obj.geometry\n    mesh = []\n    for fc, col in zip(flat_geo, graphic.value_colors):\n        mesh.append(from_face3ds_to_colored_mesh([fc], col))\n    wire_frame = []\n    for face in flat_geo:\n        wire_frame.extend(from_face3d_to_wireframe(face))\n    legend = legend_objects(graphic.legend)\n    colors = [color_to_color(col) for col in graphic.value_colors]\n    vis_set = color_obj\n", 
-  "category": "Fairyfly", 
-  "name": "FF Color Shape Attributes", 
-  "description": "Color Fairyfly Shapes in the Rhino scene using their attributes.\n_\nThis can be used as a means to check that correct properties are assigned to\ndifferent shapes.\n-"
+  "subcategory": "0 :: Create"
 }

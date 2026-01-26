@@ -24,9 +24,9 @@ different shapes.
             of the colored shapes. (Default: None).
 
     Returns:
-        mesh: Meshes of the shapes colored according to their attributes.
-        legend: Geometry representing the legend for colored meshes.
         wire_frame: A list of lines representing the outlines of the _ff_objs.
+        legend: Geometry representing the legend for colored meshes.
+        mesh: Meshes of the shapes colored according to their attributes.
         values: A list of values noting the attribute assigned to each shape.
         colors: A list of colors noting the color of each shape in the Rhino scene.
             This can be used in conjunction with the native Grasshopper
@@ -40,7 +40,7 @@ different shapes.
 
 ghenv.Component.Name = 'FF Color Shape Attributes'
 ghenv.Component.NickName = 'ColorShapeAttr'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '3'
