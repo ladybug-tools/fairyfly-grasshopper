@@ -1,0 +1,57 @@
+{
+  "version": "1.9.0", 
+  "nickname": "Meshing", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "meshing", 
+        "description": "Parameters with criteria for creating the finite element mesh.\nThese can be connected to the \"FF Model to THMZ\" component in\norder to specify settings for the THERM simulation.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_mesh_type_", 
+      "description": "Text to indicate the type of meshing algorithm to use. Choose from\nthe following. Simmetrix is generally more flexible and capable of\nhandling more complex geometry when compared with the QuatTree. However,\nthe structure of QuadTree meshes is more predictable. (Default: Simmetrix).\n* Simmetrix\n* QuadTree", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_parameter_", 
+      "description": "A positive integer for the minimum number of subdivisions to\nbe performed while meshing the input geometry. The higher the mesh\ncontrol parameter, the smaller the maximum size of finite elements\nin the model and the smoother the results will appear. However, higher\nmesh parameters will also require more time to run. (Default: 20).", 
+      "type": "int", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_check_error_", 
+      "description": "Boolean to note whether the error estimator should\nbe run as part of the finite element analysis. If the global error\nis above a specified value, then the error estimator signals the mes\ngenerator, and the mesh is refined in areas where the potential\nfor error is high.  The refined mesh is sent back to the finite\nelement solver, and a new solution is obtained. (Default: True).", 
+      "type": "bool", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_max_error_", 
+      "description": "A number between 0 and 100 for the percent error energy\nnorm used by the error estimator. This is the maximum value\nof the error energy divided by the energy of the sum of the\nrecovered fluxes and the error, multiplied by 100. (Default: 10).", 
+      "type": "double", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_max_iter_", 
+      "description": "A positive integer for the number of iterations between the error\nestimator and the solver to be performed before the finding\na solution is abandoned and the program exits. (Default: 5).", 
+      "type": "int", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: THERM", 
+  "code": "\ntry:\n    from fairyfly_therm.simulation.mesh import MeshControl\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import turn_off_old_tag\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\nturn_off_old_tag(ghenv.Component)\n\n# set default sizing factors\n_mesh_type_ = 'Simmetrix' if _mesh_type_ is None else _mesh_type_\n_parameter_ = 20 if _parameter_ is None else _parameter_\n_check_error_ = True if _check_error_ is None else _check_error_\n_max_error_ = 10 if _max_error_ is None else _max_error_\n_max_iter_ = 5 if _max_iter_ is None else _max_iter_\n\n# create the object\nmeshing = MeshControl(_mesh_type_, _parameter_, _check_error_, _max_error_, _max_iter_)\n", 
+  "category": "Fairyfly", 
+  "name": "FF Meshing Control", 
+  "description": "Create parameters with criteria for meshing THERM geometry.\n-"
+}

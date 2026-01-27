@@ -1,12 +1,12 @@
 {
-  "version": "1.9.1", 
+  "version": "1.9.2", 
   "nickname": "ModelToTHMZ", 
   "outputs": [
     [
       {
         "access": "None", 
         "name": "thmz", 
-        "description": "The file path of the SQL result file that has been generated on this\ncomputer. This will be None unless run_ is set to True.", 
+        "description": "The file path of the THMZ file that has been written from the model.", 
         "type": null, 
         "default": null
       }
@@ -17,6 +17,13 @@
       "access": "item", 
       "name": "_model", 
       "description": "A fairyfly model object possessing all geometry and therm\nsimulation properties.", 
+      "type": "System.Object", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_meshing_", 
+      "description": "An optional MeshControl object that describes how the input model\ngeometry shall be meshed for finite element analysis. This can be\ngenerated from the \"FF Meshing Control\" component. Default: uses\nthe Simmetrix mesher with a parameter of 20.", 
       "type": "System.Object", 
       "default": null
     }, 
@@ -43,7 +50,7 @@
     }
   ], 
   "subcategory": "1 :: THERM", 
-  "code": "\nimport os\n\ntry:\n    from fairyfly.config import folders\n    from fairyfly.typing import clean_string\n    from fairyfly.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:\n    from fairyfly_therm.config import folders as therm_folders\n    from fairyfly_therm.writer import model_to_thmz\n    from fairyfly_therm.run import run_model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_energy:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _write:\n    # process the simulation folder name\n    assert isinstance(_model, Model), \\\n        'Expected Fairyfly Model for _model input. Got {}.'.format(type(_model))\n    model_name = clean_string(_model.display_name)\n    _folder_ = os.path.join(folders.default_simulation_folder, model_name) \\\n        if _folder_ is None else _folder_\n\n    # write the model to THMZ or run it through THERM\n    if not run_:\n        thmz = os.path.join(_folder_, '{}.thmz'.format(model_name))\n        model_to_thmz(_model, thmz)\n    else:\n        therm_folders.check_therm_version()\n        silent = True if run_ > 1 else False\n        thmz = run_model(_model, _folder_, silent)\n", 
+  "code": "\nimport os\n\ntry:\n    from fairyfly.config import folders\n    from fairyfly.typing import clean_string\n    from fairyfly.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:\n    from fairyfly_therm.config import folders as therm_folders\n    from fairyfly_therm.writer import model_to_thmz\n    from fairyfly_therm.simulation.parameter import SimulationParameter\n    from fairyfly_therm.run import run_model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_energy:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _write:\n    # process the simulation folder name\n    assert isinstance(_model, Model), \\\n        'Expected Fairyfly Model for _model input. Got {}.'.format(type(_model))\n    model_name = clean_string(_model.display_name)\n    _folder_ = os.path.join(folders.default_simulation_folder, model_name) \\\n        if _folder_ is None else _folder_\n\n    # process the simulation parameters\n    sim_par = SimulationParameter()\n    if _meshing_ is not None:\n        sim_par.mesh = _meshing_\n\n    # write the model to THMZ or run it through THERM\n    if not run_:\n        thmz = os.path.join(_folder_, '{}.thmz'.format(model_name))\n        model_to_thmz(_model, thmz, simulation_par=sim_par)\n    else:\n        therm_folders.check_therm_version()\n        silent = True if run_ > 1 else False\n        thmz = run_model(_model, simulation_par=sim_par,\n                         directory=_folder_, silent=silent)\n", 
   "category": "Fairyfly", 
   "name": "FF Model to THMZ", 
   "description": "Write a fairyfly Model to an THMZ file (aka. THERM Zip file), which can then be\nsimulated or opened in the THERM interface.\n-"
