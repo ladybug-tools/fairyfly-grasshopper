@@ -34,7 +34,7 @@ Create Fairyfly Shape.
 
 ghenv.Component.Name = 'FF Shape'
 ghenv.Component.NickName = 'Shape'
-ghenv.Component.Message = '1.9.4'
+ghenv.Component.Message = '1.9.5'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'

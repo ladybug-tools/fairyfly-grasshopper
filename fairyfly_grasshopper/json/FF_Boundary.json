@@ -1,5 +1,5 @@
 {
-  "version": "1.9.1", 
+  "version": "1.9.2", 
   "nickname": "Boundary", 
   "outputs": [
     [
@@ -21,42 +21,42 @@
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "_name_", 
       "description": "Optional text for the name of the boundary. If unspecified,\na generic one will be automatically assigned.", 
       "type": "string", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "_temperature", 
       "description": "A number for the temperature at the boundary in degrees Celsius.\nFor NFRC conditions, this temperature should be 21C for interior\nboundary conditions and -18 C for winter exterior boundary conditions.", 
       "type": "double", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "_film_coeff", 
       "description": "A number in W/m2-K that represents the convective resistance of\nthe air film at the boundary condition. Typical film coefficient\nvalues range from 36 W/m2-K (for an exterior condition where\noutdoor wind strips away most convective resistance) to 2.5 W/m2-K\n(for a vertically-oriented interior wood/vinyl surface). For NFRC\nconditions, this should be 26 for exterior boundary conditions and\naround 3 for interior boundary conditions.", 
       "type": "double", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "rad_env_", 
       "description": "The optional output of the \"FF Radiant Environment\" component,\nwhich can be used to customize the radiant properties of the\nboundary (if they differ from the input _temperature and standard\nemissivity of 1 or if there is additional solar heat flux along\nthe boundary).", 
       "type": "System.Object", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "u_factor_tag_", 
       "description": "An optional text string for to define a U-Factor tag along\nthe boundary condition. This tag is used tell THERM the boundary on\nwhich a net U-Value shall be computed. Typical values to input here,\nwhich are recognizable in LBNL WINDOW include the following.\n* Frame\n* Edge\n* Spacer\n* ShadeInETag\n* ShadeOutETag\n* SHGC Exterior", 
       "type": "string", 
       "default": null
     }, 
     {
-      "access": "item", 
+      "access": "list", 
       "name": "rgb_color_", 
       "description": "An optional color to set the color of the material when it is\nimported to THERM. All materials from the Fairyfly Therm Library\nalready possess colors but materials from the HB-Energy material\nlib will have a randomly-generated color if none is assigned here.", 
       "type": "System.Drawing.Color", 
@@ -64,7 +64,7 @@
     }
   ], 
   "subcategory": "0 :: Create", 
-  "code": "\ntry:  # import the core fairyfly dependencies\n    from fairyfly.boundary import Boundary\n    from fairyfly.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the fairyfly-therm extension\n    from fairyfly_therm.condition.steadystate import SteadyState\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug dependencies\n    from ladybug.color import Color\n    from ladybug_geometry.geometry3d import Polyline3D\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import units_system, current_tolerance\n    from ladybug_{{cad}}.togeometry import to_polyline3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, document_counter, \\\n        longest_list, wrap_output, de_objectify_output, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # check the model tolerance\n    tol_msg = Model.check_reasonable_tolerance(units_system(), current_tolerance())\n    if tol_msg is not None:\n        give_warning(ghenv.Component, tol_msg)\n\n    # create the SteadyState condition object\n    name = 'Condition {}'.format(document_counter('condition')) \\\n        if _name_ is None else _name_\n    condition = SteadyState(_temperature, _film_coeff)\n    condition.display_name = name\n    if rad_env_ is not None:\n        emiss, rad_temp, heat_flux = de_objectify_output(rad_env_)\n        condition.emissivity = emiss\n        condition.radiant_temperature = rad_temp\n        condition.heat_flux = heat_flux\n    if rgb_color_ is not None:\n        condition.color = Color(rgb_color_.R, rgb_color_.G, rgb_color_.B)\n\n    # create the boundary objects\n    boundaries = []  # list of boundaries that will be returned\n    for j, geo in enumerate(_geo):\n        lb_geo = to_polyline3d(geo)\n        lb_segs = lb_geo.segments if isinstance(lb_geo, Polyline3D) else [lb_geo]\n        ff_boundary = Boundary(lb_segs)\n        ff_boundary.display_name = '{} {}'.format(name, j) if len(_geo) > 1 else name\n        ff_boundary.properties.therm.condition = condition\n        if u_factor_tag_ is not None:\n            ff_boundary.properties.therm.u_factor_tag = u_factor_tag_\n        boundaries.append(ff_boundary)\n    boundaries = wrap_output(boundaries)\n", 
+  "code": "\ntry:  # import the core fairyfly dependencies\n    from fairyfly.boundary import Boundary\n    from fairyfly.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the fairyfly-therm extension\n    from fairyfly_therm.condition.steadystate import SteadyState\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:  # import the core ladybug dependencies\n    from ladybug.color import Color\n    from ladybug_geometry.geometry3d import Polyline3D\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.config import units_system, current_tolerance\n    from ladybug_{{cad}}.togeometry import to_polyline3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, document_counter, \\\n        longest_list, wrap_output, de_objectify_output, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # check the model tolerance\n    tol_msg = Model.check_reasonable_tolerance(units_system(), current_tolerance())\n    if tol_msg is not None:\n        give_warning(ghenv.Component, tol_msg)\n\n    # create the boundary objects\n    boundaries = []  # list of boundaries that will be returned\n    for j, geo in enumerate(_geo):\n        # translate the geometry\n        lb_geo = to_polyline3d(geo)\n        lb_segs = lb_geo.segments if isinstance(lb_geo, Polyline3D) else [lb_geo]\n        ff_boundary = Boundary(lb_segs)\n\n        # create the SteadyState condition object\n        name = 'Condition {}'.format(document_counter('condition')) \\\n            if len(_name_) == 0 else longest_list(_name_, j)\n        condition = SteadyState(longest_list(_temperature, j), longest_list(_film_coeff, j))\n        condition.display_name = name\n        if len(rad_env_) != 0:\n            rad_env = longest_list(rad_env_, j)\n            emiss, rad_temp, heat_flux = de_objectify_output(rad_env)\n            condition.emissivity = emiss\n            condition.radiant_temperature = rad_temp\n            condition.heat_flux = heat_flux\n        if len(rgb_color_) != 0:\n            rgb_color = longest_list(rgb_color_, j)\n            condition.color = Color(rgb_color.R, rgb_color.G, rgb_color.B)\n\n        # assign properties to the boundary\n        ff_boundary.display_name = '{} {}'.format(name, j) \\\n            if len(_name_) != 0 and len(_name_) != len(_geo) else name\n        ff_boundary.properties.therm.condition = condition\n        if len(u_factor_tag_) != 0:\n            ff_boundary.properties.therm.u_factor_tag = longest_list(u_factor_tag_, j)\n        boundaries.append(ff_boundary)\n    boundaries = wrap_output(boundaries)\n", 
   "category": "Fairyfly", 
   "name": "FF Boundary", 
   "description": "Create Fairyfly Boundary.\n-"

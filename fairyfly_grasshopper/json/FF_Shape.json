@@ -1,5 +1,5 @@
 {
-  "version": "1.9.4", 
+  "version": "1.9.5", 
   "nickname": "Shape", 
   "outputs": [
     [
@@ -17,7 +17,7 @@
       "access": "list", 
       "name": "_geo", 
       "description": "Rhino Brep or planar Polyline geometry.", 
-      "type": "Brep", 
+      "type": "GeometryBase", 
       "default": null
     }, 
     {

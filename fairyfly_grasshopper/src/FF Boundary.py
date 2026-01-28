@@ -53,10 +53,10 @@ Create Fairyfly Boundary.
 
 ghenv.Component.Name = 'FF Boundary'
 ghenv.Component.NickName = 'Boundary'
-ghenv.Component.Message = '1.9.1'
+ghenv.Component.Message = '1.9.2'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = '1'
+ghenv.Component.AdditionalHelpFromDocStrings = '2'
 
 try:  # import the core fairyfly dependencies
     from fairyfly.boundary import Boundary
@@ -90,28 +90,34 @@ if all_required_inputs(ghenv.Component):
     if tol_msg is not None:
         give_warning(ghenv.Component, tol_msg)
 
-    # create the SteadyState condition object
-    name = 'Condition {}'.format(document_counter('condition')) \
-        if _name_ is None else _name_
-    condition = SteadyState(_temperature, _film_coeff)
-    condition.display_name = name
-    if rad_env_ is not None:
-        emiss, rad_temp, heat_flux = de_objectify_output(rad_env_)
-        condition.emissivity = emiss
-        condition.radiant_temperature = rad_temp
-        condition.heat_flux = heat_flux
-    if rgb_color_ is not None:
-        condition.color = Color(rgb_color_.R, rgb_color_.G, rgb_color_.B)
-
     # create the boundary objects
     boundaries = []  # list of boundaries that will be returned
     for j, geo in enumerate(_geo):
+        # translate the geometry
         lb_geo = to_polyline3d(geo)
         lb_segs = lb_geo.segments if isinstance(lb_geo, Polyline3D) else [lb_geo]
         ff_boundary = Boundary(lb_segs)
-        ff_boundary.display_name = '{} {}'.format(name, j) if len(_geo) > 1 else name
+
+        # create the SteadyState condition object
+        name = 'Condition {}'.format(document_counter('condition')) \
+            if len(_name_) == 0 else longest_list(_name_, j)
+        condition = SteadyState(longest_list(_temperature, j), longest_list(_film_coeff, j))
+        condition.display_name = name
+        if len(rad_env_) != 0:
+            rad_env = longest_list(rad_env_, j)
+            emiss, rad_temp, heat_flux = de_objectify_output(rad_env)
+            condition.emissivity = emiss
+            condition.radiant_temperature = rad_temp
+            condition.heat_flux = heat_flux
+        if len(rgb_color_) != 0:
+            rgb_color = longest_list(rgb_color_, j)
+            condition.color = Color(rgb_color.R, rgb_color.G, rgb_color.B)
+
+        # assign properties to the boundary
+        ff_boundary.display_name = '{} {}'.format(name, j) \
+            if len(_name_) != 0 and len(_name_) != len(_geo) else name
         ff_boundary.properties.therm.condition = condition
-        if u_factor_tag_ is not None:
-            ff_boundary.properties.therm.u_factor_tag = u_factor_tag_
+        if len(u_factor_tag_) != 0:
+            ff_boundary.properties.therm.u_factor_tag = longest_list(u_factor_tag_, j)
         boundaries.append(ff_boundary)
     boundaries = wrap_output(boundaries)
