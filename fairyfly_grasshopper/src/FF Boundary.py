@@ -53,10 +53,10 @@ Create Fairyfly Boundary.
 
 ghenv.Component.Name = 'FF Boundary'
 ghenv.Component.NickName = 'Boundary'
-ghenv.Component.Message = '1.9.2'
+ghenv.Component.Message = '1.9.3'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
-ghenv.Component.AdditionalHelpFromDocStrings = '2'
+ghenv.Component.AdditionalHelpFromDocStrings = '1'
 
 try:  # import the core fairyfly dependencies
     from fairyfly.boundary import Boundary
@@ -101,6 +101,8 @@ if all_required_inputs(ghenv.Component):
         # create the SteadyState condition object
         name = 'Condition {}'.format(document_counter('condition')) \
             if len(_name_) == 0 else longest_list(_name_, j)
+        name = '{} {}'.format(name, j) \
+            if len(_name_) != 0 and len(_name_) != len(_geo) else name
         condition = SteadyState(longest_list(_temperature, j), longest_list(_film_coeff, j))
         condition.display_name = name
         if len(rad_env_) != 0:
@@ -114,8 +116,7 @@ if all_required_inputs(ghenv.Component):
             condition.color = Color(rgb_color.R, rgb_color.G, rgb_color.B)
 
         # assign properties to the boundary
-        ff_boundary.display_name = '{} {}'.format(name, j) \
-            if len(_name_) != 0 and len(_name_) != len(_geo) else name
+        ff_boundary.display_name = name
         ff_boundary.properties.therm.condition = condition
         if len(u_factor_tag_) != 0:
             ff_boundary.properties.therm.u_factor_tag = longest_list(u_factor_tag_, j)

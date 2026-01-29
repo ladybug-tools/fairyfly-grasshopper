@@ -34,7 +34,7 @@ Create Fairyfly Shape.
 
 ghenv.Component.Name = 'FF Shape'
 ghenv.Component.NickName = 'Shape'
-ghenv.Component.Message = '1.9.5'
+ghenv.Component.Message = '1.9.6'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '0 :: Create'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -125,6 +125,9 @@ if all_required_inputs(ghenv.Component):
         if len(rgb_color_) != 0:
             col = longest_list(rgb_color_, j)
             if not mat._locked:
+                mat.color = Color(col.R, col.G, col.B)
+            else:
+                mat = mat.duplicate()
                 mat.color = Color(col.R, col.G, col.B)
         mats[mat.display_name] = mat
 
