@@ -1,36 +1,50 @@
 {
-  "version": "1.9.0", 
-  "code": "\ntry:  # import the fairyfly dependencies\n    from fairyfly.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_polyline3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component):\n    # extract the regions and holes\n    assert isinstance(_model, Model), \\\n        'Expected Fairyfly Model. Got {}.'.format(type(_model))\n    regions, holes = _model.properties.therm.problem_areas\n    regions = [from_polyline3d(pl) for pl in regions]\n    holes = [from_polyline3d(pl) for pl in holes]\n\n    # give warnings about problems\n    if len(regions) != 0:\n        msg = '{} disconnected regions in the model were found.'.format(len(regions))\n        give_warning(ghenv.Component, msg)\n    if len(holes) != 0:\n        msg = '{} holes in the model were found.'.format(len(holes))\n        give_warning(ghenv.Component, msg)\n", 
+  "version": "1.9.1", 
+  "nickname": "Problems", 
   "category": "Fairyfly", 
+  "code": "\ntry:  # import the fairyfly dependencies\n    from fairyfly.model import Model\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly:\\n\\t{}'.format(e))\n\ntry:  # import the ladybug_{{cad}} dependencies\n    from ladybug_{{cad}}.fromgeometry import from_polyline3d, from_face3d, \\\n        from_linesegment3d\n    from ladybug_{{cad}}.{{plugin}} import all_required_inputs, give_warning\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _run:\n    # extract the regions and holes\n    assert isinstance(_model, Model), \\\n        'Expected Fairyfly Model. Got {}.'.format(type(_model))\n    regions, holes = _model.properties.therm.problem_areas\n    regions = [from_polyline3d(pl) for pl in regions]\n    holes = [from_polyline3d(pl) for pl in holes]\n    duplicates = [from_face3d(f) for f in _model.duplicate_shape_geometry]\n    for line in _model.duplicate_boundary_geometry:\n        duplicates.append(from_linesegment3d(line))\n\n    # give warnings about problems\n    if len(regions) != 0:\n        msg = '{} disconnected regions in the model were found.'.format(len(regions))\n        give_warning(ghenv.Component, msg)\n    if len(holes) != 0:\n        msg = '{} holes in the model were found.'.format(len(holes))\n        give_warning(ghenv.Component, msg)\n    if len(duplicates) != 0:\n        msg = '{} duplicate geometries in the model were found.'.format(len(duplicates))\n        give_warning(ghenv.Component, msg)\n", 
+  "description": "Identify problematic areas in Fairyfly models that make them un-simulate-able.\n_\nThese inclue \"problem regions,\" which identify cases where there are two or\nmore groups of shapes that are disconnected from one another.\n_\nIt also includes \"problem holes,\" which identify cases of gaps or holes within\na larger connected region of shapes.\n-", 
   "outputs": [
     [
       {
-        "access": "None", 
         "name": "regions", 
-        "description": "The Rhino wireframe version of the Honeybee geometry object, which\nwill be visible in the Rhino scene.", 
+        "access": "None", 
         "type": null, 
+        "description": "Polylines for regions of shapes that are disconnected from one\nanother and are therefore un-simulate-able.", 
         "default": null
       }, 
       {
-        "access": "None", 
         "name": "holes", 
-        "description": "Script variable VizWireF", 
+        "access": "None", 
         "type": null, 
+        "description": "Polylines for holes in the model that make it un-simulate-able.", 
+        "default": null
+      }, 
+      {
+        "name": "duplicates", 
+        "access": "None", 
+        "type": null, 
+        "description": "A list of Surfaces for duplicate shape geometries in the\nmodel. This list will also include line segments for any duplicate\nboundaries in the model.", 
         "default": null
       }
     ]
   ], 
-  "subcategory": "0 :: Create", 
   "inputs": [
     {
-      "access": "item", 
       "name": "_model", 
-      "description": "A Fairyfly Model for which problem regions are to be visualized.", 
+      "access": "item", 
       "type": "System.Object", 
+      "description": "A Fairyfly Model for which problem regions are to be visualized.", 
+      "default": null
+    }, 
+    {
+      "name": "_run", 
+      "access": "item", 
+      "type": "bool", 
+      "description": "Set to \"True\" to run the component and visualize problem areas.", 
       "default": null
     }
   ], 
-  "description": "Identify problematic areas in Fairyfly models that make them un-simulate-able.\n_\nThese inclue \"problem regions,\" which identify cases where there are two or\nmore groups of shapes that are disconnected from one another.\n_\nIt also includes \"problem holes,\" which identify cases of gaps or holes within\na larger connected region of shapes.\n-", 
-  "nickname": "Problems", 
+  "subcategory": "0 :: Create", 
   "name": "FF Visualize Problem Areas"
 }
