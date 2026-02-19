@@ -41,7 +41,7 @@ Create Fairyfly Boundary.
 
 ghenv.Component.Name = 'FF Read UFactor Result'
 ghenv.Component.NickName = 'UFactorResult'
-ghenv.Component.Message = '1.9.0'
+ghenv.Component.Message = '1.9.1'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '1 :: THERM'
 ghenv.Component.AdditionalHelpFromDocStrings = '2'
@@ -115,5 +115,11 @@ if all_required_inputs(ghenv.Component):
 
         # if IP units are requested, convert them
         if ip_:
-            u_factors = UValue().to_ip(u_factors, 'W/m2-K')[0]
+            u_factors_ip = []
+            for uf in u_factors:
+                if uf is not None:
+                    uf = UValue().to_ip([uf], 'W/m2-K')[0][0]
+                u_factors_ip.append(uf)
+            u_factors = u_factors_ip
             lengths = Distance().to_ip(lengths, 'mm')[0]
+            print(lengths)
