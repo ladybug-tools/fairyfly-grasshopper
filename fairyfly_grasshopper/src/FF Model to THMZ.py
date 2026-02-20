@@ -19,6 +19,10 @@ simulated or opened in the THERM interface.
             geometry shall be meshed for finite element analysis. This can be
             generated from the "FF Meshing Control" component. Default: uses
             the Simmetrix mesher with a parameter of 20.
+        _exposure_: An optional ModelExposure object that describes the model's location
+            within a larger building. This can be generated from the
+            "FF Model Exposure" component. Default: uses the model's location
+            within the 3D Rhino scene to set the gravity arrow.
         _folder_: An optional folder on this computer, into which the THMZ file
             will be written.
         _write: Set to "True" to write the THMZ file from the fairyfly Model.
@@ -37,7 +41,7 @@ simulated or opened in the THERM interface.
 
 ghenv.Component.Name = 'FF Model to THMZ'
 ghenv.Component.NickName = 'ModelToTHMZ'
-ghenv.Component.Message = '1.9.2'
+ghenv.Component.Message = '1.9.3'
 ghenv.Component.Category = 'Fairyfly'
 ghenv.Component.SubCategory = '1 :: THERM'
 ghenv.Component.AdditionalHelpFromDocStrings = '1'
@@ -77,6 +81,8 @@ if all_required_inputs(ghenv.Component) and _write:
     sim_par = SimulationParameter()
     if _meshing_ is not None:
         sim_par.mesh = _meshing_
+    if _exposure_ is not None:
+        sim_par.exposure = _exposure_
 
     # write the model to THMZ or run it through THERM
     if not run_:

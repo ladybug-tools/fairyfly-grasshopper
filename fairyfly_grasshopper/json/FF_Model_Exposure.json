@@ -1,0 +1,50 @@
+{
+  "version": "1.9.0", 
+  "nickname": "Exposure", 
+  "outputs": [
+    [
+      {
+        "access": "None", 
+        "name": "exposure", 
+        "description": "Parameters for THERM model exposure, that describes the model's\nlocation within a larger building. These can be connected to the\n\"FF Model to THMZ\" component in order to specify settings for\nthe THERM simulation.", 
+        "type": null, 
+        "default": null
+      }
+    ]
+  ], 
+  "inputs": [
+    {
+      "access": "item", 
+      "name": "_model_type_", 
+      "description": "Text to indicate the type of construction detail or the purpose\nof the model. Chose from the following. (Default: Other).\n* Window\n* Opaque Wall\n* Opaque Roof\n* Other", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_cross_section_", 
+      "description": "Text to indicate the type of cross section that the model represents.\nThe acceptable fields here depend upon the model_type. If unspecified,\nthe default is set to the top of each list below for each model_type.\n_\nFor the Window model_type, choose from the following.\n* Sill\n* Jamb\n* Head\n* Horizontal Divider\n* Vertical Divider\n* Horizontal Meeting Rail\n* Vertical Meeting Rail\n* Common Frame\n* Spacer\n_\nFor the Opaque Wall and Roof model_type, choose from the following.\n* Sill Plate\n* Header\n* End Section\n* Middle Section\n* Thermal Bridge\n* Window Framing - Sill\n* Rough Opening - Header\n* Rough Opening - Jamb\n_\nFor the Other model_type, choose from the following.\n* General Cross Section\n* Common Thermal Bridge", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_gravity_orient_", 
+      "description": "Text to indicate the direction of gravity for the model. If unspecified, \nthis will be computed from the orientation of the model's plane\nin the 3D scene.\n* Down\n* Up\n* Left\n* Right\n* Into Screen\n* Out Of Screen", 
+      "type": "string", 
+      "default": null
+    }, 
+    {
+      "access": "item", 
+      "name": "_wind_orient_", 
+      "description": "A number between 0 and 360 for the direction the exterior surface\nof the model faces. This orientation of the exterior surface\nis used to determine the wind direction for the simulation. (Default: 0).\nFor reference, 0 = North, 90 = East, 180 = South, 270 = West.", 
+      "type": "double", 
+      "default": null
+    }
+  ], 
+  "subcategory": "1 :: THERM", 
+  "code": "\ntry:\n    from fairyfly_therm.simulation.exposure import ModelExposure\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import fairyfly_therm:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_{{cad}}.{{plugin}} import turn_off_old_tag\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_{{cad}}:\\n\\t{}'.format(e))\nturn_off_old_tag(ghenv.Component)\n\n# set default sizing factors\n_model_type_ = 'Other' if _model_type_ is None else _model_type_\n_wind_orient_ = 0 if _wind_orient_ is None else _wind_orient_\n\n# create the object\nexposure = ModelExposure(_model_type_, _cross_section_, _gravity_orient_, _wind_orient_)\n", 
+  "category": "Fairyfly", 
+  "name": "FF Model Exposure", 
+  "description": "Create parameters for THERM model exposure, that describes the model's location\nwithin a larger building.\n-"
+}
